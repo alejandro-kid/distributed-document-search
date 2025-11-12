@@ -82,12 +82,29 @@ export class Server {
   async stop(): Promise<void> {
     if (!this.httpServer) return;
 
+    const server = this.httpServer;
+    this.httpServer = undefined;
+
     return new Promise((resolve, reject) => {
       this.logger.info('Stopping HTTP server...');
-      this.httpServer?.close((error) => {
+
+      // Check if server is actually running before trying to close it
+      if (!server.listening) {
+        this.logger.info('HTTP server is not running, skipping close');
+        resolve();
+        return;
+      }
+
+      server.close((error) => {
         if (error) {
-          this.logger.error({ err: error }, 'Error while stopping the server');
-          reject(error);
+          // Ignore ERR_SERVER_NOT_RUNNING as it means server was already closed
+          if ((error as NodeJS.ErrnoException).code === 'ERR_SERVER_NOT_RUNNING') {
+            this.logger.info('HTTP server already closed');
+            resolve();
+          } else {
+            this.logger.error({ err: error }, 'Error while stopping the server');
+            reject(error);
+          }
         } else {
           this.logger.info('HTTP server stopped successfully');
           resolve();
