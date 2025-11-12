@@ -1,0 +1,70 @@
+# Directorios de salida y generados
+dist/
+build/
+coverage/
+tmp/
+temp/
+out/
+.next/
+.nuxt/
+.output/
+.cache/
+storybook-static/
+
+# Archivos de dependencias
+node_modules/
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+.pnp.*
+.yarn/
+
+# Archivos de configuración
+.gitignore
+.npmignore
+.eslintignore
+.prettierignore
+.dockerignore
+.editorconfig
+.env
+.env.*
+!.env.example
+
+# Archivos de declaración TypeScript generados
+**/*.d.ts
+!src/@types/*.d.ts
+
+# Activos binarios
+**/*.png
+**/*.jpg
+**/*.jpeg
+**/*.gif
+**/*.ico
+**/*.svg
+**/*.webp
+**/*.ttf
+**/*.woff
+**/*.woff2
+**/*.eot
+**/*.pdf
+**/*.zip
+**/*.gz
+**/*.tar
+
+# Archivos generados o compilados
+**/*.min.js
+**/*.bundle.js
+**/*.generated.*
+**/generated/
+**/*-lock.json
+
+# Archivos específicos de proyectos
+tsconfig.json
+tsconfig.*.json
+CHANGELOG.md
+LICENSE
+*.log
+
+# Casos especiales en markdown que podrían romper la estructura
+# Descomenta si tienes problemas con tablas o estructura específica en markdown
+# **/*.md

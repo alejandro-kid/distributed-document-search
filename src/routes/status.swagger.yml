@@ -1,0 +1,16 @@
+tags:
+  - name: Status
+    description: Endpoint para verificar el estado del servidor
+
+paths:
+  /status:
+    get:
+      summary: Verificar el estado del servidor
+      description: Endpoint para verificar si el servidor está funcionando correctamente
+      tags:
+        - Status
+      responses:
+        '200':
+          description: Servidor funcionando correctamente
+        '500':
+          description: Error del servidor

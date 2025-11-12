@@ -1,0 +1,78 @@
+tags:
+  - name: Authentication
+    description: User authentication endpoints
+
+paths:
+  /auth/login/x:
+    post:
+      summary: Login or Register with X (Twitter)
+      description: Receives an access token from X, validates it, and then logs in an existing user or registers a new one.
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - token
+              properties:
+                token:
+                  type: string
+                  description: The access token provided by X (Twitter).
+      responses:
+        '200':
+          description: Successfully authenticated.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      username:
+                        type: string
+                      avatarUrl:
+                        type: string
+                  app_token:
+                    type: string
+                    description: The JWT token to use for subsequent requests to this API.
+        '400':
+          description: Bad Request (e.g., missing token).
+        '401':
+          description: Unauthorized (e.g., invalid token).
+        '500':
+          description: Internal Server Error.
+
+  /auth/x/callback:
+    post:
+      summary: X (Twitter) Callback Endpoint
+      description: This endpoint is for testing purposes to receive and log the callback payload from X (Twitter) or any frontend request.
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: The callback payload from X (Twitter) or any data sent by the frontend.
+              # Allowing any properties for testing purposes
+              additionalProperties: true
+      responses:
+        '200':
+          description: Callback received and logged successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Callback received and logged successfully
+        '500':
+          description: Internal Server Error.
