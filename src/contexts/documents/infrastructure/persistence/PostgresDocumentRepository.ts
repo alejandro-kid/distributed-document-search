@@ -50,4 +50,27 @@ export class PostgresDocumentRepository implements DocumentRepository {
 
     await this.pool.query(query);
   }
+
+  async search(query: string): Promise<Document[]> {
+    const searchQuery = {
+      text: `
+        SELECT id, title, content, created_at FROM documents
+        WHERE
+          to_tsvector('english', title || ' ' || content) @@ plainto_tsquery('english', $1)
+        ORDER BY created_at DESC
+      `,
+      values: [query],
+    };
+
+    const result = await this.pool.query(searchQuery);
+
+    return result.rows.map((row) =>
+      Document.fromPrimitives({
+        id: row.id,
+        title: row.title,
+        content: row.content,
+        createdAt: row.created_at,
+      }),
+    );
+  }
 }
