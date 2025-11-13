@@ -102,21 +102,44 @@
 - [ ] Verify checks and tests pass
 - [ ] Create commit: "feat(documents): implement GET /search endpoint"
 
-### 2.3 GET /documents/{id} - Retrieve Document Details
+### 2.3 GET /documents/{id} - Retrieve Document Details (IN PROGRESS)
 
-**Feature File**: Create BDD scenarios
+**Status**: 🟢 Planning Complete - Ready for Implementation
 
-- [ ] Create feature file: `tests/features/documents/get-document.feature`
-  - [ ] Scenario: Successfully retrieve document by ID
-  - [ ] Scenario: Return 404 for non-existent document
+**Architectural Decisions**: ✅ Complete
+- Decision Framework applied: QUERY operation, no validation, Repository Pattern
+- Document: `docs/decisions/get-document-decisions.md`
 
-**Implementation**:
+**Feature File**: ✅ Complete
+- [x] Create feature file: `tests/features/documents/get-document.feature`
+  - [x] Scenario: Successfully retrieve document by ID
+  - [x] Scenario: Return 404 for non-existent document
+  - [x] Scenario: Invalid document ID format (400)
+  - [x] Scenario: Multiple documents - correct one returned
+  - [x] Scenario: Performance verification
+  - [x] Scenario: Special characters preservation
+  - [x] Scenario: Large content handling
+  - [x] Scenario: Data integrity verification
 
-- [ ] Create application: FindDocumentByIdQuery and QueryHandler
-- [ ] Create controller: GetDocumentController
-- [ ] Create route: GET /documents/:id
-- [ ] Update Swagger docs
-- [ ] Tests (unit, integration, acceptance)
+**Implementation Plan**: ✅ Complete
+- Document: `docs/implementation-plan/get-document-implementation.md`
+- CQRS Pattern: Query/QueryHandler (consistent with codebase)
+- Repository Method: findById() with SQL direct query
+- Error Handling: 404/400/500 HTTP responses
+- Testing: Unit + Integration + Acceptance
+
+**Implementation** (To be started):
+
+- [ ] STEP 1: Add DocumentNotFoundError domain error
+- [ ] STEP 2: Create FindDocumentByIdQuery and QueryHandler
+- [ ] STEP 3: Extend DocumentRepository with findById()
+- [ ] STEP 4: Create GetDocumentController
+- [ ] STEP 5: Add route GET /documents/:id
+- [ ] STEP 6: Update Swagger documentation
+- [ ] STEP 7: Register DI components
+- [ ] STEP 8: Create step definitions (Gherkin)
+- [ ] STEP 9: Create unit tests
+- [ ] STEP 10: Create integration tests
 - [ ] Verify checks and tests pass
 - [ ] Create commit: "feat(documents): implement GET /documents/{id} endpoint"
 
