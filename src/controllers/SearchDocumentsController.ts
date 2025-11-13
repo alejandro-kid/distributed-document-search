@@ -8,6 +8,8 @@ export class SearchDocumentsController {
   async run(req: Request, res: Response): Promise<void> {
     try {
       const query = req.query.q as string;
+      const page = parseInt(req.query.page as string, 10) || 1;
+      const limit = parseInt(req.query.limit as string, 10) || 10;
 
       if (!query || query.trim().length === 0) {
         res.status(400).json({
@@ -17,21 +19,29 @@ export class SearchDocumentsController {
         return;
       }
 
-      const request = new SearchDocumentsRequest(query);
+      if (page < 1 || limit < 1) {
+        res.status(400).json({
+          error: 'Invalid pagination parameters',
+          message: 'Page and limit must be positive integers',
+        });
+        return;
+      }
+
+      const request = new SearchDocumentsRequest(query, page, limit);
       const response = await this.documentSearcher.run(request);
 
-      if (response.documents.length === 0) {
+      if (response.data.length === 0 && response.meta.pagination.total === 0) {
         res.status(200).json({
           data: [],
+          meta: response.meta,
           message: 'No documents found',
-          count: 0,
         });
         return;
       }
 
       res.status(200).json({
-        data: response.documents,
-        count: response.documents.length,
+        data: response.data,
+        meta: response.meta,
       });
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Internal server error';

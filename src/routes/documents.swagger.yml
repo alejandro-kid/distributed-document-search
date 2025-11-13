@@ -6,7 +6,7 @@ paths:
   /search:
     get:
       summary: Search documents
-      description: Search for documents by title and content using full-text search
+      description: Search for documents by title and content using full-text search with pagination
       tags:
         - Documents
       parameters:
@@ -17,6 +17,22 @@ paths:
           schema:
             type: string
             example: "TypeScript"
+        - in: query
+          name: page
+          required: false
+          description: "Page number for pagination (default: 1)"
+          schema:
+            type: integer
+            minimum: 1
+            example: 1
+        - in: query
+          name: limit
+          required: false
+          description: "Number of items per page (default: 10)"
+          schema:
+            type: integer
+            minimum: 1
+            example: 10
       responses:
         '200':
           description: Search completed successfully
@@ -44,14 +60,29 @@ paths:
                           type: string
                           format: date-time
                           example: "2025-11-12T10:30:00Z"
-                  count:
-                    type: integer
-                    example: 2
+                  meta:
+                    type: object
+                    properties:
+                      pagination:
+                        type: object
+                        properties:
+                          total:
+                            type: integer
+                            example: 30
+                          page:
+                            type: integer
+                            example: 1
+                          limit:
+                            type: integer
+                            example: 10
+                          totalPages:
+                            type: integer
+                            example: 3
                   message:
                     type: string
                     example: "No documents found"
         '400':
-          description: Bad request - search query missing
+          description: Bad request - search query or pagination parameters missing/invalid
           content:
             application/json:
               schema:
@@ -60,6 +91,9 @@ paths:
                   error:
                     type: string
                     example: "Search query is required"
+                  message:
+                    type: string
+                    example: "Please provide a search query using the \"q\" parameter"
         '500':
           description: Internal server error
           content:
@@ -69,6 +103,7 @@ paths:
                 properties:
                   error:
                     type: string
+                    example: "Internal server error"
 
   /documents/{id}:
     get:
@@ -135,6 +170,7 @@ paths:
                 properties:
                   error:
                     type: string
+                    example: "Internal server error"
 
     delete:
       summary: Delete document by ID
@@ -185,6 +221,7 @@ paths:
                 properties:
                   error:
                     type: string
+                    example: "Internal server error"
 
   /documents:
     post:
@@ -251,3 +288,4 @@ paths:
                 properties:
                   error:
                     type: string
+                    example: "Internal server error"

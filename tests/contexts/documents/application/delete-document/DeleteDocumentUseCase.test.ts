@@ -17,7 +17,7 @@ describe('DeleteDocumentUseCase', () => {
       save: async () => {},
       findById: async () => null,
       delete: async () => {},
-      search: async () => [],
+      search: async () => ({ documents: [], total: 0 }),
     };
   });
 
