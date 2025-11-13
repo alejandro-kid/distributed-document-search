@@ -1,0 +1,70 @@
+tags:
+  - name: Documents
+    description: Document indexing endpoints
+
+paths:
+  /documents:
+    post:
+      summary: Index a new document
+      description: Creates and indexes a new document in the system
+      tags:
+        - Documents
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - title
+                - content
+              properties:
+                title:
+                  type: string
+                  example: "My Document"
+                  description: The title of the document
+                content:
+                  type: string
+                  example: "This is the document content"
+                  description: The content of the document (cannot be empty)
+      responses:
+        '201':
+          description: Document indexed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    format: uuid
+                    example: "550e8400-e29b-41d4-a716-446655440000"
+                  title:
+                    type: string
+                    example: "My Document"
+                  content:
+                    type: string
+                    example: "This is the document content"
+                  createdAt:
+                    type: string
+                    format: date-time
+                    example: "2025-11-12T10:30:00Z"
+        '400':
+          description: Bad request - title or content missing
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Title and content are required"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
