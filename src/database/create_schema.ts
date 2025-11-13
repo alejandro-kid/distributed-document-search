@@ -18,6 +18,22 @@ async function createSchema() {
         );
       `);
 
+      // SQL para crear la tabla documents
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS documents (
+            id UUID PRIMARY KEY,
+            title VARCHAR(255) NOT NULL,
+            content TEXT NOT NULL,
+            created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+            CONSTRAINT document_content_not_empty CHECK (content != '')
+        );
+      `);
+
+      // SQL para crear índices en documents
+      await client.query(`
+        CREATE INDEX IF NOT EXISTS idx_documents_created_at ON documents(created_at DESC);
+      `);
+
       // SQL para crear la función y el trigger para updated_at
       await client.query(`
         CREATE OR REPLACE FUNCTION update_updated_at_column()
