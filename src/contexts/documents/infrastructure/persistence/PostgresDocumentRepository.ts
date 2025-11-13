@@ -51,20 +51,35 @@ export class PostgresDocumentRepository implements DocumentRepository {
     await this.pool.query(query);
   }
 
-  async search(query: string): Promise<Document[]> {
+  async search(query: string, page: number, limit: number): Promise<{ documents: Document[]; total: number }> {
+    const offset = (page - 1) * limit;
+
+    const countQuery = {
+      text: `
+        SELECT COUNT(*) FROM documents
+        WHERE
+          to_tsvector('english', title || ' ' || content) @@ plainto_tsquery('english', $1)
+      `,
+      values: [query],
+    };
+
+    const countResult = await this.pool.query(countQuery);
+    const total = parseInt(countResult.rows[0].count, 10);
+
     const searchQuery = {
       text: `
         SELECT id, title, content, created_at FROM documents
         WHERE
           to_tsvector('english', title || ' ' || content) @@ plainto_tsquery('english', $1)
         ORDER BY created_at DESC
+        LIMIT $2 OFFSET $3
       `,
-      values: [query],
+      values: [query, limit, offset],
     };
 
     const result = await this.pool.query(searchQuery);
 
-    return result.rows.map((row) =>
+    const documents = result.rows.map((row) =>
       Document.fromPrimitives({
         id: row.id,
         title: row.title,
@@ -72,5 +87,7 @@ export class PostgresDocumentRepository implements DocumentRepository {
         createdAt: row.created_at,
       }),
     );
+
+    return { documents, total };
   }
 }

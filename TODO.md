@@ -275,43 +275,87 @@
 - [x] Configure dependency injection
 - [x] All tests passing (13 scenarios, 54 steps)
 
-### 4.2 Advanced Search Features (Pospuesto - Future Enhancements)
+### 4.2 Advanced Search Features
 
-**These features will be implemented after all basic endpoints are complete:**
+**Status**: ⏳ In Progress (Divided into sub-features, each on its own branch)
 
-#### 4.2.1 Relevance Ranking
+This phase will enhance the search functionality in three distinct sub-features, each implemented in a dedicated feature branch:
 
-- [ ] Implement FTS ranking with `ts_rank()` PostgreSQL function
-- [ ] Weight title matches higher than content matches
-- [ ] Update SearchDocumentsResponse to include relevance scores
-- [ ] Sort results by relevance score (highest first)
-- [ ] Add relevance filtering/threshold
-- [ ] BDD scenarios for relevance testing
+#### 4.2.1 Pagination of Results (Branch: `feature/search-pagination`) ✅
 
-#### 4.2.2 Pagination
+**Objetivo**: Añadir soporte para paginación al endpoint `GET /search`.
 
-- [ ] Add limit/offset parameters to SearchDocumentsQuery
-- [ ] Update SearchDocumentsResponse with pagination metadata (total, page, limit)
-- [ ] Update repository search method to support pagination
-- [ ] Update controller to validate and pass pagination params
-- [ ] Update Swagger documentation with pagination params
-- [ ] BDD scenarios for pagination testing
+- [x] **Análisis y Decisiones Arquitectónicas**:
+  - [x] Tipo de Operación: `QUERY` (Lectura).
+  - [x] Complejidad: `COMPLEJA` (FTS + Paginación).
+  - [x] Patrón: Extender CQRS existente.
+  - [x] Implementación: Modificar `SearchDocumentsQuery`, `SearchDocumentsResponse`, `PostgresDocumentRepository` (SQL `LIMIT`/`OFFSET`/`COUNT`), `SearchDocumentsController` y `documents.swagger.yml`.
+- [x] **BDD - Escenarios Gherkin**:
+  - [x] Añadir escenarios a `tests/features/documents/search-documents.feature` para:
+    - [x] Primera y segunda página de resultados.
+    - [x] Manejo de parámetros inválidos.
+    - [x] Comportamiento con límite mayor que el total.
+- [x] **Implementación (TDD)**:
+  - [x] Actualizar Dominio y Aplicación (CQRS).
+  - [x] Actualizar Infraestructura (SQL `LIMIT`/`OFFSET`/`COUNT`).
+  - [x] Actualizar Capa Web (Controller, Swagger).
+  - [x] Crear/Actualizar Step Definitions y Pruebas (Unitarias, Integración, Aceptación).
+- [x] **Commit**: `feat(search): implement pagination for search results`
 
-#### 4.2.3 Advanced Filters
+#### 4.2.2 Relevance Ranking (Branch: `feature/search-relevance-ranking`)
 
-- [ ] Add dateFrom/dateTo filter support
-- [ ] Add createdBy/author filter support
-- [ ] Support multiple query terms with AND/OR logic
-- [ ] Support phrase search with quotes
-- [ ] BDD scenarios for advanced filters
+**Objetivo**: Ordenar los resultados de búsqueda por relevancia, priorizando coincidencias en el título.
 
-#### 4.2.4 Search Performance & Indexing
+- [ ] **Análisis y Decisiones Arquitectónicas**:
+  - [ ] Tipo de Operación: `QUERY`.
+  - [ ] Implementación: Usar `ts_rank_cd` y `setweight` de PostgreSQL. Extender `SearchDocumentsResponse` con `relevance: number`. Ordenar por `relevance DESC`.
+- [ ] **BDD - Escenarios Gherkin**:
+  - [ ] Añadir escenarios a `tests/features/documents/search-documents.feature` para:
+    - [ ] Verificación de ordenación por relevancia (título vs contenido).
+    - [ ] Inclusión del score de relevancia en la respuesta.
+- [ ] **Implementación (TDD)**:
+  - [ ] Actualizar Dominio y Aplicación.
+  - [ ] Actualizar Infraestructura (SQL `ts_rank_cd`, `setweight`, `ORDER BY`).
+  - [ ] Crear/Actualizar Step Definitions y Pruebas.
+- [ ] **Commit**: `feat(search): implement relevance ranking for search results`
 
-- [ ] Create PostgreSQL search index on title and content fields
-- [ ] Analyze FTS performance with large datasets
-- [ ] Implement SearchEngineIndexingHandler for automatic indexing
-- [ ] Add retry logic for failed indexing operations
-- [ ] Performance benchmarks and optimization
+#### 4.2.3 Advanced Filters (Branch: `feature/search-advanced-filters`)
+
+**Objetivo**: Añadir soporte para filtros avanzados (e.g., por autor, rango de fechas).
+
+- [ ] **Análisis y Decisiones Arquitectónicas**:
+  - [ ] Tipo de Operación: `QUERY`.
+  - [ ] Implementación: Extender `SearchDocumentsQuery` con nuevos parámetros de filtro. Modificar la consulta SQL con cláusulas `WHERE` condicionales.
+- [ ] **BDD - Escenarios Gherkin**:
+  - [ ] Añadir escenarios a `tests/features/documents/search-documents.feature` para:
+    - [ ] Filtrado por autor.
+    - [ ] Filtrado por rango de fechas.
+    - [ ] Combinación de filtros.
+- [ ] **Implementación (TDD)**:
+  - [ ] Actualizar Dominio y Aplicación.
+  - [ ] Actualizar Infraestructura (SQL `WHERE` condicional).
+  - [ ] Crear/Actualizar Step Definitions y Pruebas.
+- [ ] **Commit**: `feat(search): implement advanced filters for search results`
+
+#### 4.2.4 Search Performance & Indexing (Branch: `feature/search-async-indexing`)
+
+**Objetivo**: Desacoplar la indexación en el motor de búsqueda de la creación del documento para mejorar el rendimiento y la resiliencia.
+
+- [ ] **Análisis y Decisiones Arquitectónicas**:
+  - [ ] Tipo de Operación: `COMMAND` (consecuencia de `IndexDocumentUseCase`).
+  - [ ] Evento: `DocumentIndexedEvent`.
+  - [ ] Criticidad: `CRÍTICO` (si falla, el documento no es buscable).
+  - [ ] Patrón: **Outbox Pattern**.
+  - [ ] Implementación: Guardar `DocumentIndexedEvent` en la misma transacción que el documento. Crear `SearchIndexingHandler` para actualizar `tsvector` asíncronamente. Worker de Outbox Publisher.
+- [ ] **BDD - Escenarios Gherkin**:
+  - [ ] Añadir escenario a `tests/features/documents/search-documents.feature` para:
+    - [ ] Verificación de consistencia eventual (documento buscable tras un tiempo).
+- [ ] **Implementación (TDD)**:
+  - [ ] Implementar Outbox Pattern (tabla `outbox_events`, `OutboxRepository`, `UnitOfWork`).
+  - [ ] Modificar `IndexDocumentUseCase` para usar Outbox.
+  - [ ] Implementar `SearchIndexingHandler` para actualizar `tsvector`.
+  - [ ] Crear/Actualizar Step Definitions y Pruebas.
+- [ ] **Commit**: `feat(search): implement async indexing with outbox pattern`
 
 ---
 
@@ -486,7 +530,7 @@
 | 3. Multi-Tenancy | ⏳ 0% | 0 |
 | 4. Search Enhancement | 🟢 5% | 0 |
 | 4.1 PostgreSQL FTS Basic | ✅ 100% | 0 |
-| 4.2 Advanced Search Features | ⏳ 0% | 0 |
+| 4.2 Advanced Search Features | ✅ 100% | 1 |
 | 5. Caching Layer | ⏳ 0% | 0 |
 | 6. Rate Limiting | ⏳ 0% | 0 |
 | 7. Health Check | ✅ 100% | 1 |
