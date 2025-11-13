@@ -136,6 +136,56 @@ paths:
                   error:
                     type: string
 
+    delete:
+      summary: Delete document by ID
+      description: Deletes a document by its unique identifier. Returns 204 No Content on success.
+      tags:
+        - Documents
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: Document ID
+          schema:
+            type: string
+            example: "550e8400-e29b-41d4-a716-446655440000"
+      responses:
+        '204':
+          description: Document deleted successfully (no content returned)
+        '400':
+          description: Bad request - invalid document ID format
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Invalid document ID format"
+                  documentId:
+                    type: string
+        '404':
+          description: Document not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Document not found"
+                  documentId:
+                    type: string
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+
   /documents:
     post:
       summary: Index a new document

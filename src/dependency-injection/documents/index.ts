@@ -6,6 +6,8 @@ import { DocumentSearcher } from '@/contexts/documents/application/search-docume
 import { SearchDocumentsController } from '@/controllers/SearchDocumentsController';
 import { FindDocumentByIdUseCase } from '@/contexts/documents/application/find-document/FindDocumentByIdUseCase';
 import { GetDocumentController } from '@/controllers/GetDocumentController';
+import { DeleteDocumentUseCase } from '@/contexts/documents/application/delete-document/DeleteDocumentUseCase';
+import { DeleteDocumentController } from '@/controllers/DeleteDocumentController';
 
 export const register = (container: ContainerBuilder) => {
   // Repository
@@ -26,6 +28,10 @@ export const register = (container: ContainerBuilder) => {
     .register('Documents.use_cases.FindDocumentById', FindDocumentByIdUseCase)
     .addArgument(new Reference('Documents.repositories.DocumentRepository'));
 
+  container
+    .register('Documents.use_cases.DeleteDocument', DeleteDocumentUseCase)
+    .addArgument(new Reference('Documents.repositories.DocumentRepository'));
+
   // Controllers
   container
     .register('Controllers.IndexDocumentController', IndexDocumentController)
@@ -38,4 +44,8 @@ export const register = (container: ContainerBuilder) => {
   container
     .register('Controllers.GetDocumentController', GetDocumentController)
     .addArgument(new Reference('Documents.use_cases.FindDocumentById'));
+
+  container
+    .register('Controllers.DeleteDocumentController', DeleteDocumentController)
+    .addArgument(new Reference('Documents.use_cases.DeleteDocument'));
 };

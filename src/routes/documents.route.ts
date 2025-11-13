@@ -1,6 +1,7 @@
 import { IndexDocumentController } from '@/controllers/IndexDocumentController';
 import { SearchDocumentsController } from '@/controllers/SearchDocumentsController';
 import { GetDocumentController } from '@/controllers/GetDocumentController';
+import { DeleteDocumentController } from '@/controllers/DeleteDocumentController';
 import { Router } from 'express';
 import { ContainerBuilder } from 'node-dependency-injection';
 
@@ -8,6 +9,7 @@ export const register = (router: Router, container: ContainerBuilder): void => {
   const indexDocumentController: IndexDocumentController = container.get('Controllers.IndexDocumentController');
   const searchDocumentsController: SearchDocumentsController = container.get('Controllers.SearchDocumentsController');
   const getDocumentController: GetDocumentController = container.get('Controllers.GetDocumentController');
+  const deleteDocumentController: DeleteDocumentController = container.get('Controllers.DeleteDocumentController');
 
   router.post('/documents', (req, res) => {
     return indexDocumentController.run(req, res);
@@ -15,6 +17,10 @@ export const register = (router: Router, container: ContainerBuilder): void => {
 
   router.get('/documents/:id', (req, res) => {
     return getDocumentController.run(req, res);
+  });
+
+  router.delete('/documents/:id', (req, res) => {
+    return deleteDocumentController.run(req, res);
   });
 
   router.get('/search', (req, res) => {
