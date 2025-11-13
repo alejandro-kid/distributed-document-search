@@ -1,6 +1,6 @@
 {
   "name": "document-search-service",
-  "version": "1.1.0",
+  "version": "1.4.0",
   "description": "Distributed document search service capable of searching through millions of documents with sub-second response times",
   "main": "src/start.ts",
   "scripts": {
