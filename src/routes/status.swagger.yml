@@ -1,16 +1,65 @@
 tags:
   - name: Status
-    description: Endpoint para verificar el estado del servidor
+    description: Endpoint para verificar el estado del servidor y sus dependencias
 
 paths:
   /status:
     get:
-      summary: Verificar el estado del servidor
-      description: Endpoint para verificar si el servidor está funcionando correctamente
+      summary: Verificar el estado del servidor y dependencias
+      description: Endpoint para verificar si el servidor y todas sus dependencias están funcionando correctamente
       tags:
         - Status
       responses:
         '200':
-          description: Servidor funcionando correctamente
+          description: Servidor y todas las dependencias funcionan correctamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum: [healthy]
+                    description: Estado general de la aplicación
+                  timestamp:
+                    type: string
+                    format: date-time
+                    description: Timestamp en formato ISO 8601
+                  uptime:
+                    type: number
+                    description: Tiempo de ejecución en segundos
+                  version:
+                    type: string
+                    description: Versión de la aplicación
+                  dependencies:
+                    type: object
+                    properties:
+                      postgresql:
+                        type: object
+                        properties:
+                          status:
+                            type: string
+                            enum: [up, down]
+                          message:
+                            type: string
+        '503':
+          description: Una o más dependencias no están disponibles
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum: [unhealthy]
+                  timestamp:
+                    type: string
+                    format: date-time
+                  uptime:
+                    type: number
+                  version:
+                    type: string
+                  dependencies:
+                    type: object
         '500':
           description: Error del servidor
