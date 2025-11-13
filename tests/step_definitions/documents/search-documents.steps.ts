@@ -2,9 +2,9 @@ import { After, AfterAll, Before, Given, Then, When } from '@cucumber/cucumber';
 import assert from 'assert';
 import { Pool } from 'pg';
 import request from 'supertest';
-import { PostgresConnectionManager } from '../../src/contexts/shared/infrastructure/persistence/PostgresConnectionManager';
-import container from '../../src/dependency-injection';
-import { Server } from '../../src/server';
+import { PostgresConnectionManager } from '../../../src/contexts/shared/infrastructure/persistence/PostgresConnectionManager';
+import container from '../../../src/dependency-injection';
+import { Server } from '../../../src/server';
 
 let _server: Server;
 let _request: request.SuperTest<request.Test>;
@@ -22,7 +22,7 @@ Before(async function () {
   }
   // @ts-expect-error: supertest type issue
   _request = request(httpServer);
-  _pool = await PostgresConnectionManager.getPool();
+  _pool = PostgresConnectionManager.getPool();
   await _pool.query('DELETE FROM documents');
   _createdDocuments = [];
 });

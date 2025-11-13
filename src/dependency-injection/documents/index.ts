@@ -4,6 +4,8 @@ import { IndexDocumentUseCase } from '@/contexts/documents/application/index-doc
 import { IndexDocumentController } from '@/controllers/IndexDocumentController';
 import { DocumentSearcher } from '@/contexts/documents/application/search-documents/DocumentSearcher';
 import { SearchDocumentsController } from '@/controllers/SearchDocumentsController';
+import { FindDocumentByIdUseCase } from '@/contexts/documents/application/find-document/FindDocumentByIdUseCase';
+import { GetDocumentController } from '@/controllers/GetDocumentController';
 
 export const register = (container: ContainerBuilder) => {
   // Repository
@@ -20,6 +22,10 @@ export const register = (container: ContainerBuilder) => {
     .register('Documents.use_cases.SearchDocuments', DocumentSearcher)
     .addArgument(new Reference('Documents.repositories.DocumentRepository'));
 
+  container
+    .register('Documents.use_cases.FindDocumentById', FindDocumentByIdUseCase)
+    .addArgument(new Reference('Documents.repositories.DocumentRepository'));
+
   // Controllers
   container
     .register('Controllers.IndexDocumentController', IndexDocumentController)
@@ -28,4 +34,8 @@ export const register = (container: ContainerBuilder) => {
   container
     .register('Controllers.SearchDocumentsController', SearchDocumentsController)
     .addArgument(new Reference('Documents.use_cases.SearchDocuments'));
+
+  container
+    .register('Controllers.GetDocumentController', GetDocumentController)
+    .addArgument(new Reference('Documents.use_cases.FindDocumentById'));
 };
