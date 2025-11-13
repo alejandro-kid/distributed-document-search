@@ -16,6 +16,7 @@ describe('IndexDocumentUseCase', () => {
       save: jest.fn(),
       findById: jest.fn(),
       delete: jest.fn(),
+      search: jest.fn(),
     };
 
     useCase = new IndexDocumentUseCase(mockRepository);
