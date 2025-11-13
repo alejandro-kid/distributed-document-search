@@ -6,6 +6,13 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    env:
+      DB_HOST: localhost
+      DB_PORT: 5432
+      DB_USER: test
+      DB_PASSWORD: test
+      DB_DATABASE: test
+
     services:
       postgres:
         image: postgres:18
@@ -37,22 +44,11 @@ jobs:
         run: pnpm install
 
       - name: Create DB schema
-        env:
-          DB_HOST: localhost
-          DB_PORT: 5432
-          DB_USER: test
-          DB_PASSWORD: test
-          DB_DATABASE: test
         run: pnpm run db:create-schema
 
       - name: Run tests
-        env:
-          DB_HOST: localhost
-          DB_PORT: 5432
-          DB_USER: test
-          DB_PASSWORD: test
-          DB_DATABASE: test
-        run: pnpm test:all
+        run: |
+          pnpm test:all
 
   build_and_publish:
     runs-on: ubuntu-latest
