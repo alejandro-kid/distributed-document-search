@@ -65,6 +65,22 @@
 - [x] Create PostgresDocumentRepository tests (10 tests)
 - [x] Create commit: "feat(documents): add comprehensive input validation"
 
+**Pending Cache Invalidation** (to be implemented in Phase 5):
+
+- [ ] Create CacheService abstraction
+- [ ] Create InMemoryCacheService implementation (for development/testing)
+- [ ] Inject CacheService into IndexDocumentUseCase for cache invalidation
+- [ ] Implement cache invalidation after document creation
+- [ ] Tests for cache invalidation
+- [ ] Create commit: "feat(documents): add cache invalidation on document indexing"
+
+**Pending Event Handlers** (to be implemented in Phase 4):
+
+- [ ] SearchEngineIndexingHandler: Listen to DocumentIndexedEvent to index in PostgreSQL FTS
+  - Will be implemented in Phase 4 when PostgreSQL FTS is added
+  - Pattern: Outbox (critical - document must be searchable)
+  - Retry: Exponential backoff
+
 ### 2.2 GET /search - Search Documents
 
 **Feature File**: Create BDD scenarios for searching
@@ -165,8 +181,18 @@
 - [ ] Implement relevance scoring/ranking
 - [ ] Add search result limit and offset
 - [ ] Tests for search accuracy and performance
+
+**Event Handler Implementation**:
+
+- [ ] Create SearchEngineIndexingHandler listening to DocumentIndexedEvent
+  - [ ] Handler implementation with error handling
+  - [ ] Index documents in PostgreSQL FTS on event
+  - [ ] Implement retry logic for failed indexing
+  - [ ] Register handler in DI container
+  - [ ] Tests for handler (unit + integration)
+
 - [ ] Verify checks and tests pass
-- [ ] Create commit: "feat(search): implement PostgreSQL FTS"
+- [ ] Create commit: "feat(search): implement PostgreSQL FTS with event handler"
 
 ---
 
