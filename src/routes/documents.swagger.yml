@@ -1,8 +1,75 @@
 tags:
   - name: Documents
-    description: Document indexing endpoints
+    description: Document indexing and search endpoints
 
 paths:
+  /search:
+    get:
+      summary: Search documents
+      description: Search for documents by title and content using full-text search
+      tags:
+        - Documents
+      parameters:
+        - in: query
+          name: q
+          required: true
+          description: Search query string
+          schema:
+            type: string
+            example: "TypeScript"
+      responses:
+        '200':
+          description: Search completed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          format: uuid
+                          example: "550e8400-e29b-41d4-a716-446655440000"
+                        title:
+                          type: string
+                          example: "TypeScript Guide"
+                        content:
+                          type: string
+                          example: "Learn TypeScript basics"
+                        createdAt:
+                          type: string
+                          format: date-time
+                          example: "2025-11-12T10:30:00Z"
+                  count:
+                    type: integer
+                    example: 2
+                  message:
+                    type: string
+                    example: "No documents found"
+        '400':
+          description: Bad request - search query missing
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Search query is required"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+
   /documents:
     post:
       summary: Index a new document
