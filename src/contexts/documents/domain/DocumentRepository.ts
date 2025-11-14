@@ -5,5 +5,9 @@ export interface DocumentRepository {
   save(document: Document): Promise<void>;
   findById(id: DocumentId): Promise<Document | null>;
   delete(id: DocumentId): Promise<void>;
-  search(query: string, page: number, limit: number): Promise<{ documents: Document[]; total: number }>;
+  search(
+    query: string,
+    page: number,
+    limit: number,
+  ): Promise<{ documents: (Document & { relevance?: number })[]; total: number }>;
 }

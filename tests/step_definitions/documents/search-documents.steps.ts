@@ -159,3 +159,58 @@ Then(
     );
   },
 );
+
+Given('there is a document with title {string} and content {string}', async function (title: string, content: string) {
+  const response = await _request.post('/documents').send({
+    title: title,
+    content: content,
+  });
+
+  assert.strictEqual(response.status, 201, `Failed to create document: ${response.body?.error}`);
+
+  const createdDoc = response.body;
+  _createdDocuments.push({
+    id: createdDoc.id,
+    title: createdDoc.title,
+    content: createdDoc.content,
+  });
+});
+
+Then('the first result should be the document with title {string}', function (expectedTitle: string) {
+  const firstResult = _response.body?.data?.[0];
+  assert.ok(firstResult, 'There are no results to check.');
+  assert.strictEqual(
+    firstResult.title,
+    expectedTitle,
+    `Expected the first result to have title "${expectedTitle}", but got "${firstResult.title}".`,
+  );
+});
+
+Then('the second result should be the document with title {string}', function (expectedTitle: string) {
+  const secondResult = _response.body?.data?.[1];
+  assert.ok(secondResult, 'There is no second result to check.');
+  assert.strictEqual(
+    secondResult.title,
+    expectedTitle,
+    `Expected the second result to have title "${expectedTitle}", but got "${secondResult.title}".`,
+  );
+});
+
+interface SearchDocument {
+  id: string;
+  title: string;
+  content: string;
+  createdAt: Date;
+  relevance?: number;
+}
+
+// ... existing code ...
+
+Then('the document {string} should have a relevance score greater than 0', function (title: string) {
+  const doc = _response.body?.data?.find((d: SearchDocument) => d.title === title);
+  assert.ok(doc, `Document with title "${title}" not found in results.`);
+  assert.ok(
+    typeof doc.relevance === 'number' && doc.relevance > 0,
+    `Expected document "${title}" to have a relevance score greater than 0, but got ${doc.relevance}.`,
+  );
+});

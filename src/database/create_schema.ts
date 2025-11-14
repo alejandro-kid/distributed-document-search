@@ -25,6 +25,7 @@ async function createSchema() {
             title VARCHAR(255) NOT NULL,
             content TEXT NOT NULL,
             created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+            tsvector_column TSVECTOR,
             CONSTRAINT document_content_not_empty CHECK (content != '')
         );
       `);
@@ -32,6 +33,34 @@ async function createSchema() {
       // SQL para crear índices en documents
       await client.query(`
         CREATE INDEX IF NOT EXISTS idx_documents_created_at ON documents(created_at DESC);
+      `);
+
+      // Crear índice GIN para la columna tsvector_column
+      await client.query(`
+        CREATE INDEX IF NOT EXISTS documents_tsvector_idx ON documents USING GIN (tsvector_column);
+      `);
+
+      // Crear función para actualizar tsvector_column
+      // IMPORTANTE: Usar pesos diferentes para title (A) y content (D)
+      // A = peso 1.0, B = 0.4, C = 0.2, D = 0.1
+      await client.query(`
+        CREATE OR REPLACE FUNCTION update_documents_tsvector() RETURNS TRIGGER AS $$
+        BEGIN
+          NEW.tsvector_column =
+            setweight(to_tsvector('english', COALESCE(NEW.title, '')), 'A') ||
+            setweight(to_tsvector('english', COALESCE(NEW.content, '')), 'D');
+          RETURN NEW;
+        END;
+        $$ LANGUAGE plpgsql;
+      `);
+
+      // Crear trigger para actualizar tsvector_column automáticamente
+      await client.query(`
+        DROP TRIGGER IF EXISTS trg_update_documents_tsvector ON documents;
+        CREATE TRIGGER trg_update_documents_tsvector
+        BEFORE INSERT OR UPDATE OF title, content ON documents
+        FOR EACH ROW
+        EXECUTE FUNCTION update_documents_tsvector();
       `);
 
       // SQL para crear la función y el trigger para updated_at
@@ -60,6 +89,11 @@ async function createSchema() {
 
       await client.query('COMMIT');
       console.log('Database schema created/updated successfully.');
+
+      // Actualizar tsvector para documentos existentes
+      console.log('Updating tsvector for existing documents...');
+      await pool.query('UPDATE documents SET title = title WHERE tsvector_column IS NULL');
+      console.log('Existing documents updated.');
     } catch (error) {
       await client.query('ROLLBACK');
       console.error('Error creating database schema:', error);
