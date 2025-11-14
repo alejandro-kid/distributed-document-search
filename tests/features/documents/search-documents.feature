@@ -55,3 +55,20 @@ Feature: Search Documents
     When I search for "searchable" with page 1 and limit 20
     Then I should receive 15 documents
     And the response should include pagination metadata with total 15 results and total 1 page
+
+  Scenario: Search results are ordered by relevance (title vs content)
+    Given there are documents in the system:
+      | title               | content                      |
+      | Irrelevant Document | A document about JavaScript  |
+      | Content Match       | This document mentions relevance in its body. |
+      | Title Match         | This document has relevance in its title.     |
+    When I search for documents with query "relevance"
+    Then I should see 2 documents in the results
+    And the first result should be the document with title "Title Match"
+    And the second result should be the document with title "Content Match"
+
+  Scenario: Search response includes relevance score
+    Given there is a document with title "Relevance Score" and content "This is a test"
+    When I search for documents with query "Relevance"
+    Then I should see 1 documents in the results
+    And the document "Relevance Score" should have a relevance score greater than 0

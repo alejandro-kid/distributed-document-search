@@ -1,11 +1,14 @@
 import { Document } from '../../domain/Document';
 
+type DocumentWithRelevance = Document & { relevance?: number };
+
 export class SearchDocumentsResponse {
   readonly data: Array<{
     id: string;
     title: string;
     content: string;
     createdAt: Date;
+    relevance?: number;
   }>;
   readonly meta: {
     pagination: {
@@ -16,12 +19,13 @@ export class SearchDocumentsResponse {
     };
   };
 
-  constructor(documents: Document[], total: number, page: number, limit: number) {
+  constructor(documents: DocumentWithRelevance[], total: number, page: number, limit: number) {
     this.data = documents.map((doc) => ({
       id: doc.id.value,
       title: doc.title,
       content: doc.content,
       createdAt: doc.createdAt,
+      relevance: doc.relevance,
     }));
     this.meta = {
       pagination: {
@@ -34,7 +38,7 @@ export class SearchDocumentsResponse {
   }
 
   static fromDomainDocuments(
-    documents: Document[],
+    documents: DocumentWithRelevance[],
     total: number,
     page: number,
     limit: number,
