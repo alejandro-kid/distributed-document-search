@@ -5,7 +5,7 @@ Feature: Get Document by ID
 
   # SYNCHRONOUS: Happy path - document exists and is returned immediately
   Scenario: Successfully retrieve document by ID
-    Given a document with title "First Document" and content "This is test content" exists
+    Given a document with title "First Document", author "Test Author" and content "This is test content" exists
     When I request GET the created document
     Then I should receive status 200
     And the response should contain the document

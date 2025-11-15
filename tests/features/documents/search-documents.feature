@@ -6,10 +6,10 @@ Feature: Search Documents
 
   Scenario: Successfully search documents with matching query
     Given there are documents in the system:
-      | title               | content                      |
-      | TypeScript Guide    | Learn TypeScript basics      |
-      | JavaScript Tutorial | Master JavaScript advanced   |
-      | TypeScript Advanced | Deep dive into TypeScript    |
+      | title               | author      | content                    |
+      | TypeScript Guide    | John Doe    | Learn TypeScript basics    |
+      | JavaScript Tutorial | Jane Smith  | Master JavaScript advanced |
+      | TypeScript Advanced | John Doe    | Deep dive into TypeScript  |
     When I search for documents with query "TypeScript"
     Then I should see 2 documents in the results
     And the results should include document with title "TypeScript Guide"
@@ -17,18 +17,18 @@ Feature: Search Documents
 
   Scenario: Search returns empty results for non-matching query
     Given there are documents in the system:
-      | title          | content           |
-      | Python Basics  | Learn Python      |
-      | Java Advanced  | Master Java       |
+      | title         | author     | content           |
+      | Python Basics | Alice      | Learn Python      |
+      | Java Advanced | Bob        | Master Java       |
     When I search for documents with query "TypeScript"
     Then I should see 0 documents in the results
     And I should see message "No documents found"
 
   Scenario: Search matches both title and content
     Given there are documents in the system:
-      | title            | content                    |
-      | Web Development  | Learn TypeScript and React |
-      | Database Guide   | SQL and PostgreSQL basics  |
+      | title            | author     | content                    |
+      | Web Development  | Charlie    | Learn TypeScript and React |
+      | Database Guide   | David      | SQL and PostgreSQL basics  |
     When I search for documents with query "TypeScript"
     Then I should see 1 documents in the results
     And the results should include document with title "Web Development"
@@ -58,17 +58,55 @@ Feature: Search Documents
 
   Scenario: Search results are ordered by relevance (title vs content)
     Given there are documents in the system:
-      | title               | content                      |
-      | Irrelevant Document | A document about JavaScript  |
-      | Content Match       | This document mentions relevance in its body. |
-      | Title Match         | This document has relevance in its title.     |
+      | title               | author    | content                                       |
+      | Irrelevant Document | Eve       | A document about JavaScript                   |
+      | Content Match       | Frank     | This document mentions relevance in its body. |
+      | Title Match         | Grace     | This document has relevance in its title.     |
     When I search for documents with query "relevance"
     Then I should see 2 documents in the results
     And the first result should be the document with title "Title Match"
     And the second result should be the document with title "Content Match"
 
   Scenario: Search response includes relevance score
-    Given there is a document with title "Relevance Score" and content "This is a test"
+    Given a document with title "Relevance Score", author "Heidi" and content "This is a test" exists
     When I search for documents with query "Relevance"
     Then I should see 1 documents in the results
     And the document "Relevance Score" should have a relevance score greater than 0
+
+  Scenario: Search documents by author
+    Given there are documents in the system:
+      | title               | author      | content                    |
+      | TypeScript Guide    | John Doe    | Learn TypeScript basics    |
+      | JavaScript Tutorial | Jane Smith  | Master JavaScript advanced |
+      | TypeScript Advanced | John Doe    | Deep dive into TypeScript  |
+    When I search for "TypeScript" filtered by author "John Doe"
+    Then I should see 2 documents in the results
+    And the results should include document with title "TypeScript Guide"
+    And the results should include document with title "TypeScript Advanced"
+
+  Scenario: Search by author with no matching author
+    Given there are documents in the system:
+      | title               | author      | content                    |
+      | TypeScript Guide    | John Doe    | Learn TypeScript basics    |
+      | JavaScript Tutorial | Jane Smith  | Master JavaScript advanced |
+    When I search for "TypeScript" filtered by author "Alice Johnson"
+    Then I should see 0 documents in the results
+
+  Scenario: Search by author when query matches multiple authors
+    Given there are documents in the system:
+      | title               | author      | content      |
+      | Document One        | John Doe    | programming  |
+      | Document Two        | Jane Smith  | programming  |
+      | Document Three      | John Doe    | programming  |
+    When I search for "programming" filtered by author "John Doe"
+    Then I should see 2 documents in the results
+    And the results should include document with title "Document One"
+    And the results should include document with title "Document Three"
+
+  Scenario: Search without author filter returns all matching documents
+    Given there are documents in the system:
+      | title               | author      | content           |
+      | TypeScript Guide    | John Doe    | Learn TypeScript  |
+      | TypeScript Advanced | Jane Smith  | Deep dive        |
+    When I search for documents with query "TypeScript"
+    Then I should see 2 documents in the results

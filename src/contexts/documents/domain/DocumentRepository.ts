@@ -9,5 +9,6 @@ export interface DocumentRepository {
     query: string,
     page: number,
     limit: number,
+    author?: string,
   ): Promise<{ documents: (Document & { relevance?: number })[]; total: number }>;
 }

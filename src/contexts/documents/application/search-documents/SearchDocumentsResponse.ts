@@ -6,6 +6,7 @@ export class SearchDocumentsResponse {
   readonly data: Array<{
     id: string;
     title: string;
+    author: string;
     content: string;
     createdAt: Date;
     relevance?: number;
@@ -23,6 +24,7 @@ export class SearchDocumentsResponse {
     this.data = documents.map((doc) => ({
       id: doc.id.value,
       title: doc.title,
+      author: doc.author,
       content: doc.content,
       createdAt: doc.createdAt,
       relevance: doc.relevance,

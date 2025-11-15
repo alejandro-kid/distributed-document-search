@@ -5,7 +5,7 @@ Feature: Delete Document by ID
 
   # SYNCHRONOUS: Happy path - document is deleted successfully
   Scenario: Successfully delete document
-    Given a document with title "To Delete" and content "This will be deleted" exists
+    Given a document with title "To Delete", author "Test Author" and content "This will be deleted" exists
     When I send DELETE request to the created document
     Then I should receive status 204
     And the document should no longer exist in the database
@@ -27,7 +27,7 @@ Feature: Delete Document by ID
 
   # ASYNCHRONOUS: Side effect - event is eventually published
   Scenario: DocumentDeletedEvent published after successful deletion
-    Given a document with title "Event Test" and content "Test content" exists
+    Given a document with title "Event Test", author "Test Author" and content "Test content" exists
     When I send DELETE request to the created document
     Then the deletion should complete immediately with status 204
     And a DocumentDeletedEvent should be published eventually

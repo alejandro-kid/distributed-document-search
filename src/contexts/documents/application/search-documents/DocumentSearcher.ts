@@ -6,7 +6,12 @@ export class DocumentSearcher {
   constructor(private readonly repository: DocumentRepository) {}
 
   async run(request: SearchDocumentsRequest): Promise<SearchDocumentsResponse> {
-    const { documents, total } = await this.repository.search(request.query, request.page, request.limit);
+    const { documents, total } = await this.repository.search(
+      request.query,
+      request.page,
+      request.limit,
+      request.author,
+    );
     return SearchDocumentsResponse.fromDomainDocuments(documents, total, request.page, request.limit);
   }
 }
