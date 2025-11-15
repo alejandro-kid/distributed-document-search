@@ -10,6 +10,7 @@ export class IndexDocumentUseCase {
     // Create aggregate (validates invariants)
     const document = Document.create({
       title: request.title,
+      author: request.author,
       content: request.content,
     });
 
@@ -17,6 +18,12 @@ export class IndexDocumentUseCase {
     await this.repository.save(document);
 
     // Return response
-    return new IndexDocumentResponse(document.id.value, document.title, document.content, document.createdAt);
+    return new IndexDocumentResponse(
+      document.id.value,
+      document.title,
+      document.author,
+      document.content,
+      document.createdAt,
+    );
   }
 }

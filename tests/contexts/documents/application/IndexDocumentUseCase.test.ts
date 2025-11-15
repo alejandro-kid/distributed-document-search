@@ -23,7 +23,7 @@ describe('IndexDocumentUseCase', () => {
   });
 
   it('should index a document successfully', async () => {
-    const request = new IndexDocumentRequest('My Document', 'Some content');
+    const request = new IndexDocumentRequest('My Document', 'Test Author', 'Some content');
 
     const response = await useCase.run(request);
 
@@ -34,7 +34,7 @@ describe('IndexDocumentUseCase', () => {
   });
 
   it('should call repository save with the created document', async () => {
-    const request = new IndexDocumentRequest('My Document', 'Some content');
+    const request = new IndexDocumentRequest('My Document', 'Test Author', 'Some content');
 
     await useCase.run(request);
 
@@ -42,19 +42,19 @@ describe('IndexDocumentUseCase', () => {
   });
 
   it('should throw error when content is empty', async () => {
-    const request = new IndexDocumentRequest('My Document', '');
+    const request = new IndexDocumentRequest('My Document', 'Test Author', '');
 
     await expect(useCase.run(request)).rejects.toThrow(DocumentContentCannotBeEmptyError);
   });
 
   it('should throw error when content is only whitespace', async () => {
-    const request = new IndexDocumentRequest('My Document', '   ');
+    const request = new IndexDocumentRequest('My Document', 'Test Author', '   ');
 
     await expect(useCase.run(request)).rejects.toThrow(DocumentContentCannotBeEmptyError);
   });
 
   it('should return response with all document data', async () => {
-    const request = new IndexDocumentRequest('Test Title', 'Test content');
+    const request = new IndexDocumentRequest('Test Title', 'Test Author', 'Test content');
 
     const response = await useCase.run(request);
 
@@ -65,34 +65,34 @@ describe('IndexDocumentUseCase', () => {
   });
 
   it('should throw error when title is empty', async () => {
-    const request = new IndexDocumentRequest('', 'Valid content');
+    const request = new IndexDocumentRequest('', 'Test Author', 'Valid content');
 
     await expect(useCase.run(request)).rejects.toThrow(DocumentTitleCannotBeEmptyError);
   });
 
   it('should throw error when title is only whitespace', async () => {
-    const request = new IndexDocumentRequest('   ', 'Valid content');
+    const request = new IndexDocumentRequest('   ', 'Test Author', 'Valid content');
 
     await expect(useCase.run(request)).rejects.toThrow(DocumentTitleCannotBeEmptyError);
   });
 
   it('should throw error when title exceeds max length', async () => {
     const longTitle = 'a'.repeat(256);
-    const request = new IndexDocumentRequest(longTitle, 'Valid content');
+    const request = new IndexDocumentRequest(longTitle, 'Test Author', 'Valid content');
 
     await expect(useCase.run(request)).rejects.toThrow(DocumentTitleExceedsMaxLengthError);
   });
 
   it('should throw error when content exceeds max length', async () => {
     const largeContent = 'a'.repeat(1048577);
-    const request = new IndexDocumentRequest('Valid title', largeContent);
+    const request = new IndexDocumentRequest('Valid title', 'Test Author', largeContent);
 
     await expect(useCase.run(request)).rejects.toThrow(DocumentContentExceedsMaxLengthError);
   });
 
   it('should allow document with title at exact max length', async () => {
     const maxTitle = 'a'.repeat(255);
-    const request = new IndexDocumentRequest(maxTitle, 'Valid content');
+    const request = new IndexDocumentRequest(maxTitle, 'Test Author', 'Valid content');
 
     const response = await useCase.run(request);
 
@@ -101,7 +101,7 @@ describe('IndexDocumentUseCase', () => {
 
   it('should allow document with content at exact max length', async () => {
     const maxContent = 'a'.repeat(1048576);
-    const request = new IndexDocumentRequest('Valid title', maxContent);
+    const request = new IndexDocumentRequest('Valid title', 'Test Author', maxContent);
 
     const response = await useCase.run(request);
 

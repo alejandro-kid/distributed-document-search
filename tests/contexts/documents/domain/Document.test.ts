@@ -10,6 +10,7 @@ describe('Document', () => {
   it('should create a document with valid data', () => {
     const document = Document.create({
       title: 'My Document',
+      author: 'Test Author',
       content: 'Some content',
     });
 
@@ -22,6 +23,7 @@ describe('Document', () => {
   it('should emit DocumentIndexedEvent on creation', () => {
     const document = Document.create({
       title: 'My Document',
+      author: 'Test Author',
       content: 'Some content',
     });
 
@@ -35,6 +37,7 @@ describe('Document', () => {
     expect(() =>
       Document.create({
         title: 'My Document',
+        author: 'Test Author',
         content: '',
       }),
     ).toThrow(DocumentContentCannotBeEmptyError);
@@ -44,6 +47,7 @@ describe('Document', () => {
     expect(() =>
       Document.create({
         title: 'My Document',
+        author: 'Test Author',
         content: '   ',
       }),
     ).toThrow(DocumentContentCannotBeEmptyError);
@@ -64,6 +68,7 @@ describe('Document', () => {
     const data = {
       id: '550e8400-e29b-41d4-a716-446655440001',
       title: 'Reconstructed',
+      author: 'Test Author',
       content: 'Reconstructed content',
       createdAt: new Date(),
     };
@@ -79,6 +84,7 @@ describe('Document', () => {
     expect(() =>
       Document.create({
         title: '',
+        author: 'Test Author',
         content: 'Valid content',
       }),
     ).toThrow(DocumentTitleCannotBeEmptyError);
@@ -88,6 +94,7 @@ describe('Document', () => {
     expect(() =>
       Document.create({
         title: '   ',
+        author: 'Test Author',
         content: 'Valid content',
       }),
     ).toThrow(DocumentTitleCannotBeEmptyError);
@@ -98,6 +105,7 @@ describe('Document', () => {
     expect(() =>
       Document.create({
         title: longTitle,
+        author: 'Test Author',
         content: 'Valid content',
       }),
     ).toThrow(DocumentTitleExceedsMaxLengthError);
@@ -107,6 +115,7 @@ describe('Document', () => {
     const maxTitle = 'a'.repeat(255);
     const document = Document.create({
       title: maxTitle,
+      author: 'Test Author',
       content: 'Valid content',
     });
 
@@ -119,6 +128,7 @@ describe('Document', () => {
     expect(() =>
       Document.create({
         title: 'Valid title',
+        author: 'Test Author',
         content: largeContent,
       }),
     ).toThrow(DocumentContentExceedsMaxLengthError);
@@ -128,6 +138,7 @@ describe('Document', () => {
     const maxContent = 'a'.repeat(1048576); // exactly 1MB
     const document = Document.create({
       title: 'Valid title',
+      author: 'Test Author',
       content: maxContent,
     });
 

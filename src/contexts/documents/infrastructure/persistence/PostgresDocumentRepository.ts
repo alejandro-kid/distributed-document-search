@@ -11,14 +11,15 @@ export class PostgresDocumentRepository implements DocumentRepository {
   async save(document: Document): Promise<void> {
     const query = {
       text: `
-        INSERT INTO documents (id, title, content, created_at)
-        VALUES ($1, $2, $3, $4)
+        INSERT INTO documents (id, title, author, content, created_at)
+        VALUES ($1, $2, $3, $4, $5)
         ON CONFLICT (id) DO UPDATE SET
           title = EXCLUDED.title,
+          author = EXCLUDED.author,
           content = EXCLUDED.content,
           created_at = EXCLUDED.created_at
       `,
-      values: [document.id.value, document.title, document.content, document.createdAt],
+      values: [document.id.value, document.title, document.author, document.content, document.createdAt],
     };
 
     await this.pool.query(query);
@@ -26,7 +27,7 @@ export class PostgresDocumentRepository implements DocumentRepository {
 
   async findById(id: DocumentId): Promise<Document | null> {
     const query = {
-      text: 'SELECT id, title, content, created_at FROM documents WHERE id = $1',
+      text: 'SELECT id, title, author, content, created_at FROM documents WHERE id = $1',
       values: [id.value],
     };
 
@@ -40,6 +41,7 @@ export class PostgresDocumentRepository implements DocumentRepository {
     return Document.fromPrimitives({
       id: dbDocument.id,
       title: dbDocument.title,
+      author: dbDocument.author,
       content: dbDocument.content,
       createdAt: dbDocument.created_at,
     });
@@ -58,15 +60,25 @@ export class PostgresDocumentRepository implements DocumentRepository {
     query: string,
     page: number,
     limit: number,
+    author?: string,
   ): Promise<{ documents: DocumentWithRelevance[]; total: number }> {
     const offset = (page - 1) * limit;
+
+    // Build WHERE clause conditionally
+    let whereClause = "WHERE tsvector_column @@ plainto_tsquery('english', $1)";
+    const countValues: (string | number)[] = [query];
+
+    if (author) {
+      whereClause += ' AND author = $2';
+      countValues.push(author);
+    }
 
     const countQuery = {
       text: `
         SELECT COUNT(*) FROM documents
-        WHERE tsvector_column @@ plainto_tsquery('english', $1)
+        ${whereClause}
       `,
-      values: [query],
+      values: countValues,
     };
 
     const countResult = await this.pool.query(countQuery);
@@ -75,24 +87,34 @@ export class PostgresDocumentRepository implements DocumentRepository {
     // Usar ts_rank en lugar de ts_rank_cd y normalizarlo
     // ts_rank considera los pesos (A para title, B para content)
     // normalization 1 divide por (1 + logaritmo de la longitud del documento)
+    const searchValues: (string | number)[] = [query];
+    if (author) {
+      searchValues.push(author);
+    }
+    searchValues.push(limit, offset);
+
+    const limitParamIndex = searchValues.length - 1;
+    const offsetParamIndex = searchValues.length;
+
     const searchQuery = {
       text: `
         SELECT
           id,
           title,
+          author,
           content,
           created_at,
           ts_rank(
-            tsvector_column, 
+            tsvector_column,
             plainto_tsquery('english', $1),
             1  -- normalización: divide por 1 + log(longitud)
           ) as relevance
         FROM documents
-        WHERE tsvector_column @@ plainto_tsquery('english', $1)
+        ${whereClause}
         ORDER BY relevance DESC, created_at DESC
-        LIMIT $2 OFFSET $3
+        LIMIT $${limitParamIndex} OFFSET $${offsetParamIndex}
       `,
-      values: [query, limit, offset],
+      values: searchValues,
     };
 
     const result = await this.pool.query(searchQuery);
@@ -101,6 +123,7 @@ export class PostgresDocumentRepository implements DocumentRepository {
       const doc = Document.fromPrimitives({
         id: row.id,
         title: row.title,
+        author: row.author,
         content: row.content,
         createdAt: row.created_at,
       });

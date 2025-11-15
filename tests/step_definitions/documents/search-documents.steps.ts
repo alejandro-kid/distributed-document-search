@@ -45,6 +45,7 @@ Given('there are documents in the system:', async function (dataTable) {
   for (const doc of documents) {
     const response = await _request.post('/documents').send({
       title: doc.title,
+      author: doc.author,
       content: doc.content,
     });
 
@@ -64,6 +65,7 @@ Given('{int} documents exist with the word {string}', async function (count: num
     const response = await _request.post('/documents').send({
       id: uuid(),
       title: `Document ${i + 1}`,
+      author: `Author ${i + 1}`,
       content: `This document contains the word ${word}`,
     });
     assert.strictEqual(response.status, 201, `Failed to create document ${i + 1}`);
@@ -83,6 +85,10 @@ When(
     }
   },
 );
+
+When('I search for {string} filtered by author {string}', async function (query: string, author: string) {
+  _response = await _request.get('/search').query({ q: query, author });
+});
 
 Then('I should see {int} documents in the results', function (expectedCount: number) {
   const actualCount = _response.body?.data?.length || 0;
@@ -163,6 +169,7 @@ Then(
 Given('there is a document with title {string} and content {string}', async function (title: string, content: string) {
   const response = await _request.post('/documents').send({
     title: title,
+    author: 'Test Author',
     content: content,
   });
 

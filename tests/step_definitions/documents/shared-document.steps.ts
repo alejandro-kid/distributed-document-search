@@ -50,9 +50,9 @@ AfterAll(async function () {
 // ============ GIVEN STEPS (SHARED) ============
 
 Given(
-  'a document with title {string} and content {string} exists',
-  async function (this: DocumentWorld, title: string, content: string) {
-    this._response = await this._request.post('/documents').send({ title, content });
+  'a document with title {string}, author {string} and content {string} exists',
+  async function (this: DocumentWorld, title: string, author: string, content: string) {
+    this._response = await this._request.post('/documents').send({ title, author, content });
     assert.strictEqual(this._response.status, 201, `Failed to create document: ${this._response.body?.error}`);
     this._documentId = this._response.body.id;
     this._createdDocuments = [this._response.body];
@@ -64,6 +64,7 @@ Given('{int} documents exist in the database', async function (this: DocumentWor
   for (let i = 0; i < count; i++) {
     const response = await this._request.post('/documents').send({
       title: `Document ${i + 1}`,
+      author: `Author ${i + 1}`,
       content: `Content for document ${i + 1}`,
     });
     assert.strictEqual(response.status, 201);

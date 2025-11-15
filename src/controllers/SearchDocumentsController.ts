@@ -10,6 +10,7 @@ export class SearchDocumentsController {
       const query = req.query.q as string;
       const page = parseInt(req.query.page as string, 10) || 1;
       const limit = parseInt(req.query.limit as string, 10) || 10;
+      const author = req.query.author as string | undefined;
 
       if (!query || query.trim().length === 0) {
         res.status(400).json({
@@ -27,7 +28,7 @@ export class SearchDocumentsController {
         return;
       }
 
-      const request = new SearchDocumentsRequest(query, page, limit);
+      const request = new SearchDocumentsRequest(query, page, limit, author);
       const response = await this.documentSearcher.run(request);
 
       if (response.data.length === 0 && response.meta.pagination.total === 0) {
